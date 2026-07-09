@@ -44,10 +44,13 @@ def load_gtf_annotation(gtf_file):
 
         records.append({
             "transcript_id": attrs.get("transcript_id"),
-            "gene_id": attrs.get("gene_id"),
-            "gene_name": attrs.get("gene_name"),
-            "gene_type": attrs.get("gene_type", attrs.get("gene_biotype")),
-            "transcript_type": attrs.get("transcript_type", attrs.get("transcript_biotype"))
+            "gtf_gene_id": attrs.get("gene_id"),
+            "gtf_gene_name": attrs.get("gene_name"),
+            "gtf_gene_type": attrs.get("gene_type", attrs.get("gene_biotype")),
+            "gtf_transcript_type": attrs.get(
+                "transcript_type",
+                attrs.get("transcript_biotype")
+            )
         })
 
     annotation = pd.DataFrame(records).drop_duplicates()
@@ -96,12 +99,13 @@ def add_orf_length(df):
     length_col = find_column(
         df.columns,
         [
+            "ORF_length_nt",
+            "orf_length_nt",
+            "length_nt",
+            "length",
             "ORF_length",
             "orf_length",
-            "length",
-            "length_nt",
-            "orf_len",
-            "orf_length_nt"
+            "orf_len"
         ]
     )
 
@@ -113,14 +117,48 @@ def add_orf_length(df):
 
     df[length_col] = pd.to_numeric(df[length_col], errors="coerce")
 
-    median_length = df[length_col].dropna().median()
-
-    if median_length > 300:
-        df["ORF_length_nt"] = df[length_col]
-        df["ORF_length_aa"] = (df[length_col] / 3).round(0).astype("Int64")
-    else:
+    # Ribotricer 'length' is nucleotide length.
+    if length_col in ["ORF_length_aa", "orf_length_aa", "length_aa"]:
         df["ORF_length_aa"] = df[length_col].round(0).astype("Int64")
         df["ORF_length_nt"] = df["ORF_length_aa"] * 3
+    else:
+        df["ORF_length_nt"] = df[length_col].round(0).astype("Int64")
+        df["ORF_length_aa"] = (df["ORF_length_nt"] / 3).round(0).astype("Int64")
+
+    return df
+
+
+def add_clean_annotation(df):
+    """
+    Keep Ribotricer annotation when available, but add GTF-derived fields
+    with explicit names. Then create final clean columns:
+    gene_id, gene_name, gene_type, transcript_type
+    without _x/_y suffixes.
+    """
+
+    if "gtf_gene_id" in df.columns:
+        df["gene_id"] = df["gene_id"].where(
+            df.get("gene_id").notna(),
+            df["gtf_gene_id"]
+        ) if "gene_id" in df.columns else df["gtf_gene_id"]
+
+    if "gtf_gene_name" in df.columns:
+        df["gene_name"] = df["gene_name"].where(
+            df.get("gene_name").notna(),
+            df["gtf_gene_name"]
+        ) if "gene_name" in df.columns else df["gtf_gene_name"]
+
+    if "gtf_gene_type" in df.columns:
+        df["gene_type"] = df["gene_type"].where(
+            df.get("gene_type").notna(),
+            df["gtf_gene_type"]
+        ) if "gene_type" in df.columns else df["gtf_gene_type"]
+
+    if "gtf_transcript_type" in df.columns:
+        df["transcript_type"] = df["transcript_type"].where(
+            df.get("transcript_type").notna(),
+            df["gtf_transcript_type"]
+        ) if "transcript_type" in df.columns else df["gtf_transcript_type"]
 
     return df
 
@@ -168,7 +206,8 @@ def add_ranking(df):
     )
 
     return df.sort_values("ranking_score", ascending=False)
-    
+
+
 def main():
     if len(sys.argv) != 5:
         sys.exit(
@@ -182,8 +221,8 @@ def main():
     sample_name = sys.argv[4]
 
     print(f"Loading Ribotricer results: {ribotricer_file}")
-    df = pd.read_csv(ribotricer_file, sep="\t")
 
+    df = pd.read_csv(ribotricer_file, sep="\t")
     df["sample"] = sample_name
 
     df = extract_transcript_id(df)
@@ -210,6 +249,7 @@ def main():
         how="left"
     )
 
+    annotated = add_clean_annotation(annotated)
 
     annotated_file = f"{output_prefix}_smorfs_annotated.tsv"
     annotated.to_csv(annotated_file, sep="\t", index=False)
@@ -228,12 +268,16 @@ def main():
         "non_coding"
     }
 
-    gene_type_col = "gene_type_y"
+    if "gene_type" not in annotated.columns:
+        raise ValueError(
+            "gene_type column not found after annotation. "
+            f"Columns found: {list(annotated.columns)}"
+        )
 
-    print(f"Using biotype column for lncRNA filtering: {gene_type_col}")
+    print("Using biotype column for lncRNA filtering: gene_type")
 
     lncrna_smorfs = annotated[
-        annotated[gene_type_col].isin(lnc_types)
+        annotated["gene_type"].isin(lnc_types)
     ].copy()
 
     lncrna_file = f"{output_prefix}_lncrna_smorfs.tsv"
