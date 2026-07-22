@@ -105,11 +105,12 @@ if [[ -f "$RIBOTRICER_OUTPUT" ]]; then
 
     echo "Processing Ribotricer results: $SAMPLE"
 
-    python "$PIPELINE_DIR/scripts/ribotricer/02_process_ribotricer_results.py" \
-        "$RIBOTRICER_OUTPUT" \
-        "$GTF" \
-        "$OUT_PREFIX" \
-        "$SAMPLE"
+python "$PIPELINE_DIR/scripts/ribotricer/02_process_ribotricer_results.py" \
+    "$RIBOTRICER_OUTPUT" \
+    "$CANDIDATE_ORFS" \
+    "$GTF" \
+    "$OUT_PREFIX" \
+    "$SAMPLE"
 
 else
 
