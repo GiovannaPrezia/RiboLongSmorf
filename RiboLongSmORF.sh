@@ -125,33 +125,70 @@ else
 fi
 
 # ==========================================================
+# PROJECT PATHS
+# ==========================================================
+
+PROJECT_ROOT="$(
+    conda run --no-capture-output -n "$ENV_NAME" \
+        python -c \
+        'import sys, yaml; print(yaml.safe_load(open(sys.argv[1]))["project_root"])' \
+        "$CONFIG_FILE"
+)"
+
+GENOME_FA="$PROJECT_ROOT/09_genome/GRCh38.primary_assembly.genome.fa"
+GTF="$PROJECT_ROOT/08_annotation/gencode.v45.annotation.gtf"
+STAR_INDEX="$PROJECT_ROOT/09_genome/hg38_star_index"
+
+# ==========================================================
 # REFERENCES
 # ==========================================================
 
 echo ""
-echo "[2/4] Downloading reference files..."
+echo "[2/4] Checking reference files..."
 echo ""
 
-conda run --no-capture-output -n "$ENV_NAME" \
-    bash scripts/setup/01_download_references.sh "$CONFIG_FILE"
+if [[ -s "$GENOME_FA" && -s "$GTF" ]]; then
+    echo "✓ Genome FASTA already exists: $(readlink -f "$GENOME_FA")"
+    echo "✓ GTF already exists: $(readlink -f "$GTF")"
+else
+    echo "One or more reference files are missing."
+    echo "Downloading reference files..."
 
-echo ""
-echo "✓ Reference setup completed."
+    conda run --no-capture-output -n "$ENV_NAME" \
+        bash scripts/setup/01_download_references.sh "$CONFIG_FILE"
+
+    echo ""
+    echo "✓ Reference setup completed."
+fi
 
 # ==========================================================
 # STAR INDEX
 # ==========================================================
 
 echo ""
-echo "[3/4] Building STAR genome index..."
-echo "      This step can take 30-90+ minutes."
+echo "[3/4] Checking STAR genome index..."
 echo ""
 
-conda run --no-capture-output -n "$ENV_NAME" \
-    bash scripts/setup/02_build_star_index.sh "$CONFIG_FILE"
+if [[ -s "$STAR_INDEX/Genome" &&
+      -s "$STAR_INDEX/SA" &&
+      -s "$STAR_INDEX/SAindex" &&
+      -s "$STAR_INDEX/genomeParameters.txt" ]]; then
 
-echo ""
-echo "✓ STAR index ready."
+    echo "✓ Complete STAR index already exists:"
+    echo "  $(readlink -f "$STAR_INDEX")"
+
+else
+    echo "STAR index was not found or is incomplete."
+    echo "Building STAR genome index..."
+    echo "This step can take 30-90+ minutes."
+    echo ""
+
+    conda run --no-capture-output -n "$ENV_NAME" \
+        bash scripts/setup/02_build_star_index.sh "$CONFIG_FILE"
+
+    echo ""
+    echo "✓ STAR index ready."
+fi
 
 # ==========================================================
 # PIPELINE
