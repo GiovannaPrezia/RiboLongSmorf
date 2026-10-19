@@ -26,7 +26,7 @@ ANNOTATION_DIR="$PROJECT_ROOT/08_annotation"
 mkdir -p "$GENOME_DIR" "$ANNOTATION_DIR"
 
 GENOME_FA="$GENOME_DIR/GRCh38.primary_assembly.genome.fa"
-GTF="$ANNOTATION_DIR/gencode.v45.annotation.gtf"
+GTF="$ANNOTATION_DIR/gencode.v50.annotation.gtf"
 
 echo "Downloading GENCODE v45 genome FASTA..."
 
@@ -43,7 +43,7 @@ echo "Downloading GENCODE v45 annotation GTF..."
 
 if [[ ! -f "$GTF" ]]; then
     wget -O "$GTF.gz" \
-        "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/gencode.v45.annotation.gtf.gz"
+        "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.annotation.gtf.gz"
 
     gunzip "$GTF.gz"
 else
