@@ -32,7 +32,7 @@ echo "Downloading GENCODE v45 genome FASTA..."
 
 if [[ ! -f "$GENOME_FA" ]]; then
     wget -O "$GENOME_FA.gz" \
-        "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/GRCh38.primary_assembly.genome.fa.gz"
+        "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/GRCh38.primary_assembly.genome.fa.gz"
 
     gunzip "$GENOME_FA.gz"
 else
