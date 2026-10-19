@@ -37,7 +37,7 @@ SCRIPT_DIR="$PIPELINE_DIR/scripts"
 
 # Fixed reference paths
 GENOME_FA="$BASE_DIR/09_genome/GRCh38.primary_assembly.genome.fa"
-GTF="$BASE_DIR/08_annotation/gencode.v45.annotation.gtf"
+GTF="$BASE_DIR/08_annotation/gencode.v50.annotation.gtf"
 STAR_INDEX="$BASE_DIR/09_genome/hg38_star_index"
 
 RNA_DICT_FASTA="$PIPELINE_DIR/resources/rnas_dictionary/rnas_dictionary_human.fa"
@@ -83,20 +83,20 @@ for sample in data["samples"]:
 PY
 )
 
-SRA_DIR="$BASE_DIR/01_SRAs/ribo_seq"
-RAW_DIR="$BASE_DIR/02_fastq/ribo_seq"
+SRA_DIR="$BASE_DIR/01_SRAs/"
+RAW_DIR="$BASE_DIR/02_fastq/"
 FASTQC_RAW_DIR="$RAW_DIR/fastqc_raw"
 
-TRIM_DIR="$BASE_DIR/03_trimmed/ribo_seq"
+TRIM_DIR="$BASE_DIR/03_trimmed/"
 FASTQC_TRIM_DIR="$TRIM_DIR/fastqc_trimmed"
 
-CLEAN_DIR="$BASE_DIR/04_cleaned/ribo_seq"
+CLEAN_DIR="$BASE_DIR/04_cleaned/"
 FASTQC_CLEAN_DIR="$CLEAN_DIR/fastqc_cleaned"
 
-ALIGN_DIR="$BASE_DIR/05_alignment/ribo_seq"
-STAR_QC_DIR="$BASE_DIR/06_star_qc/ribo_seq"
+ALIGN_DIR="$BASE_DIR/05_alignment/"
+STAR_QC_DIR="$BASE_DIR/06_star_qc/"
 
-COUNT_DIR="$BASE_DIR/07_counts/ribo_seq"
+COUNT_DIR="$BASE_DIR/07_counts/"
 RIBOTRICER_DIR="$BASE_DIR/10_Ribotricer"
 MULTIQC_DIR="$BASE_DIR/11_MultiQC"
 
@@ -156,7 +156,7 @@ elif [[ "$MODE" == "2" ]]; then
     echo "1 - Raw FastQC"
     echo "2 - Cutadapt trimming"
     echo "3 - Post-trimming QC"
-    echo "4 - noN/noPolyG filtering + all_lengths/28_36"
+    echo "4 - noN/noPolyG filtering + all_lengths/25_40"
     echo "5 - Bowtie contaminant removal"
     echo "6 - FastQC on cleaned reads"
     echo "7 - STAR alignment"
