@@ -10,11 +10,10 @@ project_description: >
 
 project_root: "/path/to/project_root"
 
-threads: 20
+threads: 100
 
 size_modes:
-  - "all_lengths"
-  - "28_36"
+  - "25_40"
 
 cutadapt:
   mode: "interactive"
@@ -25,8 +24,8 @@ cutadapt:
 filtering:
   remove_N: true
   remove_polyG_only_reads: true
-  rpf_min_length: 28
-  rpf_max_length: 36
+  rpf_min_length: 25
+  rpf_max_length: 40
 
 samples:
   - run_id: "RUN_ACCESSION_1"
