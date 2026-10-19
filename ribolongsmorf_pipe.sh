@@ -344,7 +344,7 @@ run_cutadapt_interactive() {
         echo ""
         read -p "Remove first 3 nt? [y/n]: " REMOVE_3NT
         read -p "Remove polyA A{10}? [y/n]: " REMOVE_POLYA
-        read -p "Minimum length? [17]: " MIN_LEN
+        read -p "Minimum length? [20]: " MIN_LEN
 
         MIN_LEN=${MIN_LEN:-17}
         CUTADAPT_ARGS=()
@@ -390,7 +390,7 @@ run_cutadapt_default() {
         cutadapt \
             -u 3 \
             -a "A{10}" \
-            -m 17 \
+            -m 20 \
             -o "$TRIM_FASTQ" \
             "$RAW_FASTQ" \
             > "$CUTADAPT_LOG"
@@ -455,7 +455,7 @@ run_filter() {
 
     TRIM_FASTQ="$TRIM_DIR/${SAMPLE}.trim.fastq.gz"
     FILTERED_ALL="$CLEAN_DIR/${SAMPLE}.trim.noN.noPolyG.all_lengths.fastq.gz"
-    FILTERED_RPF="$CLEAN_DIR/${SAMPLE}.trim.noN.noPolyG.28_36.fastq.gz"
+    FILTERED_RPF="$CLEAN_DIR/${SAMPLE}.trim.noN.noPolyG.25_40.fastq.gz"
 
     if [[ -s "$FILTERED_ALL" && -s "$FILTERED_RPF" ]] \
         && gzip -t "$FILTERED_ALL" 2>/dev/null \
@@ -471,7 +471,7 @@ run_filter() {
             | gzip > "$FILTERED_ALL"
 
         zcat "$TRIM_FASTQ" \
-            | awk 'NR%4==1{h=$0} NR%4==2{s=$0} NR%4==3{p=$0} NR%4==0{q=$0; if(s !~ /N/ && s !~ /^G+$/ && length(s)>=28 && length(s)<=36) print h"\n"s"\n"p"\n"q}' \
+            | awk 'NR%4==1{h=$0} NR%4==2{s=$0} NR%4==3{p=$0} NR%4==0{q=$0; if(s !~ /N/ && s !~ /^G+$/ && length(s)>=25 && length(s)<=40) print h"\n"s"\n"p"\n"q}' \
             | gzip > "$FILTERED_RPF"
     fi
 }
@@ -612,7 +612,7 @@ run_featurecounts () {
 
             featureCounts \
                 -T "$THREADS" \
-                -t CDS \
+                -t exon \
                 -g gene_id \
                 -a "$GTF" \
                 -o "$COUNTS" \
