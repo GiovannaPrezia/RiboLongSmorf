@@ -22,7 +22,7 @@ PROJECT_ROOT=$(get_yaml "project_root")
 THREADS=$(get_yaml "threads")
 
 GENOME_FA="$PROJECT_ROOT/09_genome/GRCh38.primary_assembly.genome.fa"
-GTF="$PROJECT_ROOT/08_annotation/gencode.v45.annotation.gtf"
+GTF="$PROJECT_ROOT/08_annotation/gencode.v50.annotation.gtf"
 STAR_INDEX="$PROJECT_ROOT/09_genome/hg38_star_index"
 
 mkdir -p "$STAR_INDEX"
